@@ -1,0 +1,10 @@
+**/*.png
+**/*.tiff
+**/*.jpg
+**/*.LBL
+**/*.JP2
+**/*.npy
+**/*.npz
+**/.DS_Store
+**/__pycache__/
+ode-api/venv/

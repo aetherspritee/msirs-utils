@@ -1,0 +1,7 @@
+fastai
+matplotlib
+numpy
+rasterio
+scikit-dataaccess
+scikit-learn
+tqdm
