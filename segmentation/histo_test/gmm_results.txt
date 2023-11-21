@@ -1,0 +1,54 @@
+bin=4
+landmark 4
+terrain 3
+{'landmark': 0.7373737373737373, 'terrain': 0.47928994082840237}
+
+bin=5
+landmark 7
+terrain 3
+{'landmark': 0.6737373737373737, 'terrain': 0.6579881656804734}
+
+bin=6
+landmark 7
+terrain 14
+{'landmark': 0.7464646464646465, 'terrain': 0.6106508875739645}
+
+bin=7
+landmark 9
+terrain 11
+{'landmark': 0.7222222222222222, 'terrain': 0.6414201183431952}
+
+bin=8
+landmark 10
+terrain 4
+{'landmark': 0.7444444444444445, 'terrain': 0.6497041420118344}
+
+bin=9
+landmark 4
+terrain 3
+{'landmark': 0.7626262626262627, 'terrain': 0.6863905325443787}
+
+bin=10
+landmark 9
+terrain 4
+{'landmark': 0.7393939393939394, 'terrain': 0.6816568047337278}
+
+bin=11
+landmark 9
+terrain 2
+{'landmark': 0.7131313131313132, 'terrain': 0.7041420118343196}
+
+bin=12
+landmark 4
+terrain 3
+{'landmark': 0.7262626262626263, 'terrain': 0.6473372781065089}
+
+bin=13
+landmark 3
+terrain 2
+{'landmark': 0.7262626262626263, 'terrain': 0.6958579881656805}
+
+bin=14
+landmark 5
+terrain 2
+{'landmark': 0.7313131313131314, 'terrain': 0.6816568047337278}
