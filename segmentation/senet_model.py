@@ -91,7 +91,6 @@ class SegmentChunks(tf.keras.utils.Sequence):
         return np.prod(self.num_full)
 
     # FIXME: TEST THIS!!!!!!!!!!!
-    # TODO: need to resize image_batches to form (N,224,244,3)!
     def __getitem__(self, idx):
         images = []
         centers = []
@@ -106,9 +105,17 @@ class SegmentChunks(tf.keras.utils.Sequence):
                 idx_a : idx_a + self.window_size, idx_b : idx_b + self.window_size
             ]
             centers.append(image[self.window_size // 2, self.window_size // 2])
-            images.append(np.dstack([image] * 3))
+            image = np.dstack([image] * 3)
+            image = skimage.color.gray2rgb(image)
+            image = skimage.transform.resize(
+                image, (IMAGE_SIZE, IMAGE_SIZE), anti_aliasing=True
+            )
+            image = np.resize(image, (1, 224, 224, 3))
+            images.append(image)
 
-        return np.array(images), np.array(centers)
+        images = np.resize(np.array(images), (len(images), IMAGE_SIZE, IMAGE_SIZE, 3))
+        centers = np.resize(np.array(centers), (len(centers), 1))
+        return images, centers
 
 
 class SENet:
@@ -165,6 +172,8 @@ class SENet:
             workers=workers,
             use_multiprocessing=True,
         )
+
+    # TODO: add creation of map
 
     async def vectorize(self, img: np.array):
         """
