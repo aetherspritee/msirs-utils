@@ -166,14 +166,24 @@ class SENet:
         segmenter_sequence = SegmentChunks(
             img=img, window_size=window_size, step_size=step_size
         )
-        self.predictions = self.model.predict(
+        self.scores = self.model.predict(
             segmenter_sequence,
             batch_size=batch_size,
             workers=workers,
             use_multiprocessing=True,
         )
 
-    # TODO: add creation of map
+        # creation of resulting segmentation maps
+        img_size_x = img.shape[0]
+        img_size_y = img.shape[1]
+        # TODO: how the fuck are they doing that, they use this skimage.transform.resize func, need to look into that
+        self.scores = np.reshape(
+            self.scores, (img_size_x, img_size_y, len(CATEGORIES.keys()))
+        )
+
+        # might as well get the predictions
+        self.predictions = np.arry([CATEGORIES[i] for i in np.argmax(self.scores)])
+        self.predictions = np.reshape(self.predictions, (img_size_x, img_size_y))
 
     async def vectorize(self, img: np.array):
         """
