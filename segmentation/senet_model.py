@@ -2,6 +2,8 @@ import numpy as np
 import skimage
 import tensorflow as tf
 import scipy
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 CATEGORIES = {
     0: "aec",
@@ -159,9 +161,9 @@ class SENet:
         self,
         img: np.array,
         window_size: int = 200,
-        step_size: int = 4,
+        step_size: int = 1,
         batch_size: int = 64,
-        workers: int = 4,
+        workers: int = 1,
     ) -> None:
         segmenter_sequence = SegmentChunks(
             img=img, window_size=window_size, step_size=step_size
@@ -176,14 +178,36 @@ class SENet:
         # creation of resulting segmentation maps
         img_size_x = img.shape[0]
         img_size_y = img.shape[1]
-        # TODO: how the fuck are they doing that, they use this skimage.transform.resize func, need to look into that
+
         self.scores = np.reshape(
-            self.scores, (img_size_x, img_size_y, len(CATEGORIES.keys()))
+            self.scores,
+            (
+                int(img_size_x / step_size),
+                int(img_size_y / step_size),
+                len(CATEGORIES.keys()),
+            ),
+        )
+        self.scores = skimage.transform.resize(self.scores, (img_size_x, img_size_y))
+        self.predictions = np.arry([CATEGORIES[i] for i in np.argmax(self.scores)])
+        self.predictions = np.reshape(
+            self.predictions, (img_size_x / step_size, img_size_y / step_size)
+        )
+        self.predictions = skimage.transform.resize(
+            self.predictions, (img_size_x, img_size_y)
         )
 
-        # might as well get the predictions
-        self.predictions = np.arry([CATEGORIES[i] for i in np.argmax(self.scores)])
-        self.predictions = np.reshape(self.predictions, (img_size_x, img_size_y))
+        n = len(CATEGORIES.keys())
+        from_list = mpl.colors.LinearSegmentedColormap.from_list
+        cm = from_list(None, plt.cm.tab20(range(0, n)), n)
+
+        # TODO: check this output!!
+        plt.imsave(
+            "segment_test.png",
+            self.predictions,
+            cmap=cm,
+            vmin=0,
+            vmax=len(CATEGORIES.keys()),
+        )
 
     async def vectorize(self, img: np.array):
         """
