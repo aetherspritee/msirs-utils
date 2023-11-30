@@ -28,7 +28,14 @@ IMAGE_SIZE = 224
 
 
 class SegmentChunks(tf.keras.utils.Sequence):
-    def __init__(self, img: np.array, window_size: int = 224, step_size: int = 2):
+    def __init__(
+        self,
+        img: np.array,
+        window_size: int = 224,
+        step_size: int = 2,
+        batch_size: int = 64,
+    ):
+        self.batch_size = batch_size
         self.image_full = img
         self.cs = 0
         self.window_size = window_size
@@ -98,8 +105,12 @@ class SegmentChunks(tf.keras.utils.Sequence):
         centers = []
 
         low = idx * self.batch_size
-        high = min(low + self.batch_size, len(self.x))
+        high = min(
+            low + self.batch_size,
+            self.num_full[0] * self.num_full[1],
+        )
         for my_idx in range(low, high):
+            # print(f"{my_idx = }")
             idx_aa, idx_bb = np.unravel_index(my_idx, self.num_full)
             idx_a = self.idx_tiles_full_a[idx_aa]
             idx_b = self.idx_tiles_full_b[idx_bb]
@@ -108,9 +119,10 @@ class SegmentChunks(tf.keras.utils.Sequence):
             ]
             centers.append(image[self.window_size // 2, self.window_size // 2])
             image = np.dstack([image] * 3)
-            image = skimage.color.gray2rgb(image)
+            # image = skimage.color.gray2rgb(image)
+            # print(f" downscaling:: {image.shape = }")
             image = skimage.transform.resize(
-                image, (IMAGE_SIZE, IMAGE_SIZE), anti_aliasing=True
+                image, (IMAGE_SIZE, IMAGE_SIZE, 3), anti_aliasing=True
             )
             image = np.resize(image, (1, 224, 224, 3))
             images.append(image)

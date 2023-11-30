@@ -9,13 +9,13 @@ from domars_map import MarsModel, HIRISE_Image, segment_image
 from matplotlib import pyplot as plt
 import skimage.io
 
-USER = "pg2022"
+USER = "dusc"
 network_name = "densenet161"
-database_directory = f"/home/{USER}/mars-api/database"
-print(f"{database_directory}")
-file_names = glob.glob(database_directory + "/**/*.jpg", recursive=True)
-print(os.listdir(database_directory))
-print(file_names)
+# database_directory = f"/home/{USER}/mars-api/database"
+# print(f"{database_directory}")
+# file_names = glob.glob(database_directory + "/**/*.jpg", recursive=True)
+# print(os.listdir(database_directory))
+# print(file_names)
 
 torch.multiprocessing.set_sharing_strategy("file_system")
 
@@ -44,7 +44,9 @@ print(device)
 model = MarsModel(hyper_params)
 print(f"/home/{USER}/models")
 checkpoint = torch.load(
-    f"/home/{USER}/models/" + network_name + ".pth", map_location=torch.device("cpu")
+    # f"/home/{USER}/models/" + network_name + ".pth", map_location=torch.device("cpu")
+    f"/Users/{USER}/geomars_models/" + network_name + ".pth",
+    map_location=torch.device("cpu"),
 )
 model.load_state_dict(checkpoint)
 
@@ -55,18 +57,26 @@ model = model.to(device)
 # Set model to eval mode (turns off dropout and moving averages of batchnorm)
 model.eval()
 # path = f"/home/{USER}/codebase-v1/POIs/extracted_pois_ctx_crater.jpeg.png"
+file_names = ["test_img.jpg"]
 for file in file_names:
     file_name = file.split("/")[-1][:-4]
     step_size = 1
     plt.imsave(
         "segmented/" + file_name + "_" + network_name + str(step_size) + "_og_img.png",
-        skimage.io.imread(file)
-        )
+        skimage.io.imread(file),
+    )
 
     ctx_image = HIRISE_Image(path=file, transform=data_transform, step_size=step_size)
 
     test_loader = DataLoader(
         ctx_image, batch_size=64, shuffle=False, num_workers=8, pin_memory=True
     )
-    segment_image(test_loader, model, device, hyper_params, step_size=step_size, img_name=file_name)
+    segment_image(
+        test_loader,
+        model,
+        device,
+        hyper_params,
+        step_size=step_size,
+        img_name=file_name,
+    )
     print("DONE WITH FILE")

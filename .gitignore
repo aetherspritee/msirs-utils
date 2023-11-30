@@ -4,6 +4,7 @@
 **/*.LBL
 **/*.JP2
 **/*.npy
+**/*.keras
 **/*.npz
 **/.DS_Store
 **/__pycache__/
