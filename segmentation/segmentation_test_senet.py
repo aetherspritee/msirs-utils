@@ -23,4 +23,4 @@ if __name__ == "__main__":
         ),
         anti_aliasing=True,
     )
-    model.segment_image(img)
+    model.segment_image(img, step_size=4)

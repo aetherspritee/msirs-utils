@@ -175,11 +175,14 @@ class SENet:
         window_size: int = 200,
         step_size: int = 1,
         batch_size: int = 64,
-        workers: int = 1,
+        workers: int = 8,
     ) -> None:
         segmenter_sequence = SegmentChunks(
             img=img, window_size=window_size, step_size=step_size
         )
+
+        print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
+
         self.scores = self.model.predict(
             segmenter_sequence,
             batch_size=batch_size,
