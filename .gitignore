@@ -6,6 +6,7 @@
 **/*.npy
 **/*.keras
 **/*.npz
+**/*.IMG
 **/.DS_Store
 **/__pycache__/
 ode-api/venv/
