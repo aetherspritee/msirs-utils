@@ -41,11 +41,16 @@ def reformatting_img(img: np.ndarray, name: str) -> None:
     img = np.hstack((img, pad))
     print(img.shape)
     img = np.reshape(img, (x_size, y_size))
+    img = img / np.max(img)
+    img = skimage.color.gray2rgb(img)
     plt.imsave(f"{name}.jpg", img)
 
 
 if __name__ == "__main__":
-    # file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_2187_XN_38N340W.IMG"
-    file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_2644_XN_84N009W.IMG"
+    file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_2187_XN_38N340W.IMG"
+    # file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_2644_XN_84N009W.IMG"
+    # file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_1561_XN_23S332W.IMG"
+    # file_path = "/Users/dusc/msirs-utils/pds-api/P13_006210_1434_XN_36S248W.IMG"
+    # file_path = "/Users/dusc/msirs-utils/pds-api/P13_006211_2038_XN_23N283W.IMG"
     stored_file_path = "/Users/dusc/msirs-utils/pds-api/test.npy"
-    img = process_IMG(file_path=file_path)
+    img = process_IMG(file_path=file_path, img_name="image1")
