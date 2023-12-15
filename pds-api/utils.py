@@ -6,46 +6,46 @@ from numba import jit
 
 
 # @jit()
-def process_IMG(file_path: str):
-    A = np.fromfile(file_path, dtype="int16", sep="")
-
+def process_IMG(file_path: str, img_name=None):
     with open(file_path, "rb") as f:
         text = f.readlines()
 
     print(len(text))
-    print(text[0:-2])
-    test_bed = text[-1]  # [20000:20020]
-    print(test_bed[0])
+    test_bed = text[-1]
     i0 = 0
     for i in range(len(test_bed)):
         if test_bed[i] != 0:
             i0 = i
             break
-    print(test_bed[5000:5020])
-    print(test_bed[5000:5001])
-    testlol = test_bed[5002:5003]
-    test_bed = test_bed[i0:-1]
-    x_size = 5056
-    y_size = int(np.floor(len(test_bed) / x_size))
-    test_bed = test_bed[0 : x_size * y_size]
-    print(len(test_bed) / x_size)
-    print("wow", test_bed[:-20:-1])
+    test_bed = test_bed[i0:]
     img = []
     for i in range(len(test_bed)):
         b = test_bed[i : i + 1]
         b = int.from_bytes(b)
         img.append(b)
 
-    img = np.reshape(np.array(img), (x_size, y_size))
-    plt.imsave("test2.jpg", img)
-    # with open("test.jpg", "ab") as f:
-    #     f.write(text[-1])
-    # return img
+    img = np.array(img)
+    if img_name == None:
+        img_name = "image"
+    reformatting_img(img, img_name)
+    return img
+
+
+def reformatting_img(img: np.ndarray, name: str) -> None:
+    print(img.shape)
+    y_size = 5056
+    padding = y_size - np.mod(img.shape[0], y_size)
+    print(padding)
+    x_size = int((img.shape[0] + padding) / y_size)
+    pad = [0] * padding
+    img = np.hstack((img, pad))
+    print(img.shape)
+    img = np.reshape(img, (x_size, y_size))
+    plt.imsave(f"{name}.jpg", img)
 
 
 if __name__ == "__main__":
-    file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_2187_XN_38N340W.IMG"
-
+    # file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_2187_XN_38N340W.IMG"
+    file_path = "/Users/dusc/msirs-utils/pds-api/P13_006213_2644_XN_84N009W.IMG"
+    stored_file_path = "/Users/dusc/msirs-utils/pds-api/test.npy"
     img = process_IMG(file_path=file_path)
-    # plt.imshow(img)
-    # plt.show()
