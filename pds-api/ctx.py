@@ -18,7 +18,7 @@ class CTX:
         for item in to_download:
             file = wget.download(item, out=output_directory)
             print(f"Downloading {file}")
-            download_paths.append(output_directory + "/" + file)
+            download_paths.append(file)
 
         return download_paths
 
@@ -85,8 +85,8 @@ QUERY_DICT = {
     "product_id": "P13_00621*",
     "query_type": "",
     "results": "",
-    "number_product_limit": "10",
-    "result_offset_number": "",
+    "number_product_limit": "1",
+    "result_offset_number": "10",
     "file_name": "*.IMG",
 }
 
