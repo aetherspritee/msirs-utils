@@ -1,14 +1,76 @@
-#!/usr/bin/env python3
 import numpy as np
-import weaviate
+import skimage
+from matplotlib import pyplot as plt
 
-class CTX():
 
+class CTX:
     def __init__(self) -> None:
-        pass
+        self.url = ""
 
-    def query(self) -> None:
-        print("Results")
+    def query(self, query_dict: dict) -> list:
+        print(query_dict)
+        results = []
+        return results
+
+    def download(self, to_download: list) -> list:
+        download_paths = []
+        for item in to_download:
+            print(f"Downloading {item}")
+
+        return download_paths
+
+    def get(self, query: dict):
+        results = self.query(query_dict=query)
+        download_paths = self.download(results)
+        for item in download_paths:
+            _ = self.process_CTX_IMG(item)
+
+    def process_CTX_IMG(self, file_path) -> np.ndarray:
+        with open(file_path, "rb") as f:
+            text = f.readlines()
+
+        print(len(text))
+        test_bed = text[-1]
+        i0 = 0
+        for i in range(len(test_bed)):
+            if test_bed[i] != 0:
+                i0 = i
+                break
+        test_bed = test_bed[i0:]
+        img = []
+        for i in range(len(test_bed)):
+            b = test_bed[i : i + 1]
+            b = int.from_bytes(b)
+            img.append(b)
+
+        img = np.array(img)
+
+        img_name = file_path.split(".")[-2]
+        self.reformatting_img(img, img_name)
+        return img
+
+    # TODO: do i want to add connection to other msirs tools here as well? Currently dont think so, as id rather
+    # import these tools into the others and integrate them that way around
+
+    @staticmethod
+    def reformatting_img(img: np.ndarray, name: str) -> None:
+        print(img.shape)
+        y_size = 5056
+        padding = y_size - np.mod(img.shape[0], y_size)
+        print(padding)
+        x_size = int((img.shape[0] + padding) / y_size)
+        pad = [0] * padding
+        img = np.hstack((img, pad))
+        print(img.shape)
+        img = np.reshape(img, (x_size, y_size))
+        img = img / np.max(img)
+        img = skimage.color.gray2rgb(img)
+        plt.imsave(f"{name}.jpg", img)
 
 
-    def
+QUERY_DICT = {"test": "hello world"}
+
+
+if __name__ == "__main__":
+    ctx = CTX()
+    ctx.get(QUERY_DICT)
