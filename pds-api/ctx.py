@@ -1,5 +1,5 @@
 import numpy as np
-import skimage, wget, os
+import skimage, wget, os, json
 from matplotlib import pyplot as plt
 from ODE_retrieval_utils import Query
 
@@ -54,6 +54,41 @@ class CTX:
 
     # TODO: do i want to add connection to other msirs tools here as well? Currently dont think so, as id rather
     # import these tools into the others and integrate them that way around
+
+    @staticmethod
+    def extract_meta_data(file_path: str, output_directory: str = ""):
+        meta_dict = {}
+        with open(file_path, "r") as f:
+            text = f.readlines()
+
+        print(len(text))
+        i0 = 0
+        for i in range(len(text)):
+            print(text[i])
+            if text[i] == "END\n":
+                i0 = i
+                break
+        metadata = text[0 : i0 - 1]
+        for entry in metadata:
+            key = entry.split("=")[0][:-1]
+            val = entry.split("=")[1][:-1]
+            if val[0] == " ":
+                val = val[1:]
+            try:
+                val = json.loads(val)
+            except:
+                pass
+            meta_dict[key] = val
+
+        if output_directory == "":
+            output_directory = file_path.split(".")[0] + ".json"
+        else:
+            if output_directory[-1] != "/":
+                output_directory = output_directory + "/"
+            output_directory = output_directory + file_path.split("/")[-1]
+        with open(output_directory, "a+") as f:
+            json.dump(meta_dict, f)
+        return meta_dict
 
     @staticmethod
     def reformatting_img(img: np.ndarray, name: str) -> None:
