@@ -1,6 +1,7 @@
 import numpy as np
-import skimage
+import skimage, wget, os
 from matplotlib import pyplot as plt
+from ODE_retrieval_utils import Query
 
 
 class CTX:
@@ -8,14 +9,16 @@ class CTX:
         self.url = ""
 
     def query(self, query_dict: dict) -> list:
-        print(query_dict)
-        results = []
+        Q = Query()
+        results = Q.query(query=query_dict)
         return results
 
-    def download(self, to_download: list) -> list:
+    def download(self, to_download: list, output_directory: str = os.getcwd()) -> list:
         download_paths = []
         for item in to_download:
-            print(f"Downloading {item}")
+            file = wget.download(item, out=output_directory)
+            print(f"Downloading {file}")
+            download_paths.append(output_directory + "/" + file)
 
         return download_paths
 
@@ -68,7 +71,24 @@ class CTX:
         plt.imsave(f"{name}.jpg", img)
 
 
-QUERY_DICT = {"test": "hello world"}
+QUERY_DICT = {
+    "target": "mars",
+    "mission": "MRO",
+    "instrument": "CTX",
+    "product_type": "EDR",
+    "western_lon": "",
+    "eastern_lon": "",
+    "min_lat": "",
+    "max_lat": "",
+    "min_ob_time": "",
+    "max_ob_time": "",
+    "product_id": "P13_00621*",
+    "query_type": "",
+    "results": "",
+    "number_product_limit": "10",
+    "result_offset_number": "",
+    "file_name": "*.IMG",
+}
 
 
 if __name__ == "__main__":
