@@ -46,6 +46,20 @@ def reformatting_img(img: np.ndarray, name: str) -> None:
     plt.imsave(f"{name}.jpg", img)
 
 
+def is_corrupted(img_path: str) -> bool:
+    corrupted = False
+
+    with open(img_path, "r") as f:
+        text = f.readlines()
+
+    for entry in text:
+        if entry.split("=")[0][:-1] == "DATA_QUALITY_DESC":
+            if entry.split("=")[1][2:-2] != "OK":
+                print(entry.split("=")[1][2:-2])
+                corrupted = True
+    return corrupted
+
+
 def extract_meta_data(file_path: str):
     meta_dict = {}
     with open(file_path, "r") as f:
@@ -86,4 +100,5 @@ if __name__ == "__main__":
     # img = process_IMG(file_path=file_path, img_name="image1")
 
     meta = extract_meta_data(file_path=file_path)
+    print(is_corrupted(file_path))
     print(meta)

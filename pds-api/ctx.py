@@ -13,12 +13,31 @@ class CTX:
         results = Q.query(query=query_dict)
         return results
 
+    @staticmethod
+    def is_corrupted(img_path: str) -> bool:
+        corrupted = False
+
+        with open(img_path, "r") as f:
+            text = f.readlines()
+
+        for entry in text:
+            if entry.split("=")[0][:-1] == "DATA_QUALITY_DESC":
+                if entry.split("=")[1][2:-2] != "OK":
+                    print(entry.split("=")[1][2:-2])
+                    corrupted = True
+        return corrupted
+
     def download(self, to_download: list, output_directory: str = os.getcwd()) -> list:
         download_paths = []
         for item in to_download:
             file = wget.download(item, out=output_directory)
             print(f"Downloading {file}")
-            download_paths.append(file)
+            if self.is_corrupted(file):
+                # corrupted data, delete file
+                print(f"Error: Data corrupted; Deleting file {file}")
+                os.remove(file)
+            else:
+                download_paths.append(file)
 
         return download_paths
 
