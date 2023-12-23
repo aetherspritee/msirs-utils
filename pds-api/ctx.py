@@ -1,7 +1,10 @@
 import numpy as np
-import skimage, wget, os, json
+import skimage, wget, os, json, sklearn.cluster
+from PIL import Image
 from matplotlib import pyplot as plt
 from ODE_retrieval_utils import Query
+
+Image.MAX_IMAGE_PIXELS = 933120000
 
 
 class CTX:
@@ -70,6 +73,34 @@ class CTX:
         img_name = file_path.split(".")[-2]
         self.reformatting_img(img, img_name)
         return img
+
+    def post_process(self, images: list[str]):
+        for img_path in images:
+            img = skimage.io.imread(img_path)
+            img = skimage.color.rgb2gray(img)
+            line1 = img[0:5, :]
+            line2 = img[-1:-5, :]
+            # try sobel filter first? then apply threshold? should be 2 very distinct lines use some density kernel mybe?
+            print(f"{img.shape = }")
+            sobel_img1 = skimage.filters.sobel_v(line1)
+            # sobel_img1 = skimage.color.gray2rgb(sobel_img1)
+            plt.imshow(sobel_img1)
+            plt.show()
+            skimage.io.imsave("line.jpg", sobel_img1)
+            MS = sklearn.cluster.MeanShift()
+            preds = MS.fit_predict(line1)
+            print(preds)
+
+    def post_process_proto(self, image: str):
+        img = skimage.io.imread(image)
+        img = skimage.color.rgba2rgb(img)
+        img = skimage.color.rgb2gray(img)
+        plt.imshow(img)
+        plt.show()
+        print(img.shape)
+        MS = sklearn.cluster.MeanShift()
+        preds = MS.fit_predict(img)
+        print(preds)
 
     # TODO: do i want to add connection to other msirs tools here as well? Currently dont think so, as id rather
     # import these tools into the others and integrate them that way around
@@ -147,4 +178,5 @@ QUERY_DICT = {
 
 if __name__ == "__main__":
     ctx = CTX()
-    ctx.get(QUERY_DICT)
+    # ctx.get(QUERY_DICT)
+    ctx.post_process_proto("/Users/dusc/line.png")
