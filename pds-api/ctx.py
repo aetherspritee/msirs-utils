@@ -41,7 +41,7 @@ class CTX:
 
         return download_paths
 
-    def get(self, query: dict):
+    def get(self, query: dict, output_directory: str = "./"):
         results = self.query(query_dict=query)
         download_paths = self.download(results)
         for item in download_paths:
