@@ -86,11 +86,13 @@ class SENet:
                 len(CATEGORIES.keys()),
             ),
         )
-        self.scores = skimage.transform.resize(self.scores, (img_size_x, img_size_y))
-        self.predictions = np.arry([CATEGORIES[i] for i in np.argmax(self.scores)])
-        self.predictions = np.reshape(
-            self.predictions, (img_size_x / step_size, img_size_y / step_size)
+        self.scores = skimage.transform.resize(
+            self.scores, (img_size_x, img_size_y, len(CATEGORIES.keys()))
         )
+        self.predictions = np.zeros(self.scores.shape)
+        for x in range(self.scores.shape[0]):
+            for y in range(self.scores[1]):
+                self.predictions[x, y] = np.argmax(self.scores[x, y])
         self.predictions = skimage.transform.resize(
             self.predictions, (img_size_x, img_size_y)
         )
