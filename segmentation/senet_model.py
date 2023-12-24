@@ -108,11 +108,23 @@ class SENet:
             vmax=len(CATEGORIES.keys()),
         )
 
-    async def vectorize(self, img: np.array):
+    async def vectorize(self, img: np.ndarray):
         """
-        Vectorize function that is used by weaviate for use as vectorizer
+        Just wraps get_descriptor() so that it can be used by weaviate for as vectorizer
         """
         return self.get_descriptor(img)
+
+    @staticmethod
+    def prep_image(img: np.ndarray) -> np.ndarray:
+        """
+        Prepares a greyscale image (1 channel) for use with the network
+        """
+        image = skimage.color.gray2rgb(img)
+        image = skimage.transform.resize(
+            image, (IMAGE_SIZE, IMAGE_SIZE), anti_aliasing=True
+        )
+        image = np.resize(image, (1, 224, 224, 3))
+        return image
 
 
 if __name__ == "__main__":
