@@ -160,5 +160,3 @@ if __name__ == "__main__":
     print(f"{dis10 = }")
     print(f"{dis12 = }")
     print(f"{dis13 = }")
-
-    # lets see if this works properly lmao
