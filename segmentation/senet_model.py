@@ -60,6 +60,8 @@ class SENet:
         step_size: int = 1,
         batch_size: int = 64,
         workers: int = 8,
+        post_process: bool = True,
+        borders: list[int] = [100, 50, 100, 50],
     ) -> None:
         segmenter_sequence = ChunkCreator(
             img=img, window_size=window_size, step_size=step_size
@@ -97,6 +99,9 @@ class SENet:
             self.predictions, (img_size_x, img_size_y)
         )
 
+        if post_process:
+            self.post_process_segmentation(borders)
+
         n = len(CATEGORIES.keys())
         from_list = mpl.colors.LinearSegmentedColormap.from_list
         cm = from_list(None, plt.cm.tab20(range(0, n)), n)
@@ -109,6 +114,7 @@ class SENet:
             vmin=0,
             vmax=len(CATEGORIES.keys()),
         )
+        # TODO: save rest of the images
 
     async def vectorize(self, img: np.ndarray):
         """
@@ -159,6 +165,12 @@ class SENet:
         ax.imshow(np.squeeze(img))
         ax.imshow(heatmap, cmap="jet", alpha=0.5)
         plt.show()
+
+    def post_process_segmentation(self, borders: list[int]):
+        self.predictions = self.predictions[
+            borders[0] : -borders[2], borders[1] : -borders[3]
+        ]
+        # TODO: add all maps here
 
     @staticmethod
     def prep_image(img: np.ndarray) -> np.ndarray:
