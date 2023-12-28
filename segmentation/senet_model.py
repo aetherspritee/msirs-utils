@@ -1,10 +1,9 @@
 import numpy as np
 import skimage
 import tensorflow as tf
-import scipy
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from ChunkCreator import ChunkCreator
+from Segmentation import Segmentation
 
 CATEGORIES = {
     0: "aec",
@@ -55,66 +54,32 @@ class SENet:
     # FIXME: Test this fully
     def segment_image(
         self,
-        img: np.ndarray,
+        image: np.ndarray,
+        name: str,
         window_size: int = 200,
         step_size: int = 1,
         batch_size: int = 64,
         workers: int = 8,
         post_process: bool = True,
         borders: list[int] = [100, 50, 100, 50],
-    ) -> None:
-        segmenter_sequence = ChunkCreator(
-            img=img, window_size=window_size, step_size=step_size
-        )
-
-        print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
-
-        self.scores = self.model.predict(
-            segmenter_sequence,
+        output_dir: str = "./segmented/",
+    ) -> tuple:
+        """
+        Name can be full image path, this is handled by the Segmenter.
+        """
+        Segmenter = Segmentation(model=self.model)
+        results = Segmenter.segment_image(
+            image=image,
+            window_size=window_size,
+            step_size=step_size,
             batch_size=batch_size,
             workers=workers,
-            use_multiprocessing=True,
+            post_process=post_process,
+            borders=borders,
+            name=name,
+            output_directory=output_dir,
         )
-
-        # creation of resulting segmentation maps
-        img_size_x = img.shape[0]
-        img_size_y = img.shape[1]
-
-        self.scores = np.reshape(
-            self.scores,
-            (
-                int(img_size_x / step_size),
-                int(img_size_y / step_size),
-                len(CATEGORIES.keys()),
-            ),
-        )
-        self.scores = skimage.transform.resize(
-            self.scores, (img_size_x, img_size_y, len(CATEGORIES.keys()))
-        )
-        self.predictions = np.zeros(self.scores.shape)
-        for x in range(self.scores.shape[0]):
-            for y in range(self.scores[1]):
-                self.predictions[x, y] = np.argmax(self.scores[x, y])
-        self.predictions = skimage.transform.resize(
-            self.predictions, (img_size_x, img_size_y)
-        )
-
-        if post_process:
-            self.post_process_segmentation(borders)
-
-        n = len(CATEGORIES.keys())
-        from_list = mpl.colors.LinearSegmentedColormap.from_list
-        cm = from_list(None, plt.cm.tab20(range(0, n)), n)
-
-        # TODO: check this output!!
-        plt.imsave(
-            "segment_test.png",
-            self.predictions,
-            cmap=cm,
-            vmin=0,
-            vmax=len(CATEGORIES.keys()),
-        )
-        # TODO: save rest of the images
+        return results
 
     async def vectorize(self, img: np.ndarray):
         """
@@ -123,6 +88,9 @@ class SENet:
         return self.get_descriptor(img)
 
     def heatmap(self, img: np.ndarray):
+        """
+        Activation heatmap (hacked) to see patterns ?? Doesnt look great so far lmao
+        """
         img = self.prep_image(img)
         last_layer_weights = self.model.layers[-3].get_weights()[0]
 
@@ -135,10 +103,6 @@ class SENet:
         last_conv_layer_output = np.squeeze(last_conv_layer_output)
         pred = np.argmax(last_layer_output)
         h = int(img.shape[1] / last_conv_layer_output.shape[1])
-        # w = int(img.shape[2] / last_conv_layer_output.shape[2])
-        # upsampled_heat = scipy.ndimage.zoom(
-        #     last_conv_layer_output, (h, h, 1), order=1
-        # )
         upsampled_heat = skimage.transform.resize(
             last_conv_layer_output,
             (
@@ -149,13 +113,6 @@ class SENet:
             anti_aliasing=True,
         )
         weights_for_pred = last_layer_weights[pred]
-        # weights_p1 = weights_for_pred[:256]
-        # print(np.shape(weights_p1))
-
-        # TODO: upsample the last dim for conv layer to make it compatable
-        # heatmap = np.dot(upsampled_heat.reshape((224 * 224, 256)), weights_p1).reshape(
-        #     224, 224
-        # )
 
         heatmap = np.dot(
             upsampled_heat.reshape((224 * 224, 512)), weights_for_pred
@@ -165,12 +122,6 @@ class SENet:
         ax.imshow(np.squeeze(img))
         ax.imshow(heatmap, cmap="jet", alpha=0.5)
         plt.show()
-
-    def post_process_segmentation(self, borders: list[int]):
-        self.predictions = self.predictions[
-            borders[0] : -borders[2], borders[1] : -borders[3]
-        ]
-        # TODO: add all maps here
 
     @staticmethod
     def prep_image(img: np.ndarray) -> np.ndarray:
