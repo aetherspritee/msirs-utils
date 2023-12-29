@@ -106,11 +106,6 @@ class Segmentation:
         else:
             return ()
 
-    def find_POIs(self):
-        # TODO: well this thing is kinda important
-        # how the fuck did i almost forget that i need this lmfao
-        pass
-
     def batch_predict(self) -> None:
         # TODO: i want this feature
         pass

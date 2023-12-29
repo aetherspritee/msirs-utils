@@ -67,6 +67,7 @@ class SENet:
         """
         Name can be full image path, this is handled by the Segmenter.
         """
+        # FIXME: handle basic checks for image here
         Segmenter = Segmentation(model=self.model)
         results = Segmenter.segment_image(
             image=image,
